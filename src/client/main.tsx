@@ -164,6 +164,24 @@ function Main() {
         };
     };
 
+    const handleDeleteAccount = async () => {
+        if (window.confirm("Are you absolutely sure? This action cannot be undone and will permanently delete your account.")) {
+            setDeleteLoading(true);
+            setApiState(prev => ({...prev, error: null, success: null}));
+            try {
+                await apiClient.delete('/api/main/user/delete'); 
+                localStorage.removeItem('accessToken'); 
+                navigate('/login'); 
+            } catch (err) {
+                if (axios.isAxiosError(err)) {
+                    const serverError = err.response?.data?.detail || 'Failed to delete account.';
+                    setApiState(prev => ({ ...prev, error: serverError }));
+                }
+                setDeleteLoading(false);
+            }
+        }
+    };
+
     const clearTopic = () => {
         setTopic('');
     };
@@ -172,8 +190,6 @@ function Main() {
         setEssay('');
         setApiState(prev => ({ ...prev, error: null, score: null }));
     };
-
-
 }
 
 export default Main
