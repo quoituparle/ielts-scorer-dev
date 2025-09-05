@@ -52,6 +52,7 @@ function Login() {
     };
 
     return(
+        <div id="auth-page">
         <div className="container">
             <h1>Login</h1>
             <div className="submit-form">
@@ -88,6 +89,7 @@ function Login() {
             <p>
                 Don't have an account? <Link to="/register">Sign up</Link>
             </p>
+        </div>
         </div>
     )
 };

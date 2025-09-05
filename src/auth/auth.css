@@ -1,10 +1,18 @@
-* {
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+#auth-page {
+  --primary-color: #8a2be2;
+  --primary-color-light: #9d4edd;
+  --error-color: #ff4d4d;
+  --text-color: #f0f0f0;
+  --bg-color-start: #1c1c3c;
+  --bg-color-end: #2a2a5a;
+  --container-bg: rgba(255, 255, 255, 0.1);
+  --input-bg: rgba(0, 0, 0, 0.2);
+  --success-color: #28a745;
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-body {
   font-family: 'Poppins', sans-serif;
   color: var(--text-color);
   background: linear-gradient(135deg, var(--bg-color-start), var(--bg-color-end));
@@ -16,6 +24,7 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
+
 
 /* --- 2. 动画定义 --- */
 @keyframes gradientAnimation {
@@ -41,7 +50,7 @@ body {
 }
 
 /* --- 3. 主容器与表单布局 --- */
-.container {
+#auth-page .container {
   width: 500px;
   max-width: 420px;
   padding: 40px;
@@ -53,22 +62,22 @@ body {
   -webkit-backdrop-filter: blur(10px);
   text-align: center;
   animation: fadeInUp 0.8s ease-out;
-  
+
   /* --- 新增代码 --- */
-  min-height: 640px; /* 为容器设置一个最小高度 */
-  display: flex; /* 使用 flex 布局更好地控制内部对齐 */
+  min-height: 640px;
+  display: flex;
   flex-direction: column;
-  justify-content: center; /* 垂直居中内容 */
+  justify-content: center;
 }
 
-h1 {
+#auth-page h1 {
   font-size: 2.5rem;
   font-weight: 600;
   margin-bottom: 20px;
   text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-h3 {
+#auth-page h3 {
   font-weight: 400;
   font-size: 1.1rem;
   line-height: 1.6;
@@ -77,28 +86,28 @@ h3 {
 }
 
 
-.submit-form form {
+#auth-page .submit-form form {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.submit-form form div {
+#auth-page .submit-form form div {
   text-align: left;
 }
 
 /* --- 4. 表单元素样式 (输入框, 标签, 按钮) --- */
-label {
+#auth-page label {
   display: block;
   font-weight: 500;
   margin-bottom: 8px;
   font-size: 0.9rem;
 }
 
-input[type="email"],
-input[type="password"],
-input[type="text"],
-input[type="number"] {
+#auth-page input[type="email"],
+#auth-page input[type="password"],
+#auth-page input[type="text"],
+#auth-page input[type="number"] {
   width: 100%;
   padding: 12px 15px;
   border-radius: 10px;
@@ -111,23 +120,23 @@ input[type="number"] {
   transition: all 0.3s ease;
 }
 
-input[type="email"]::placeholder,
-input[type="password"]::placeholder,
-input[type="text"]::placeholder,
-input[type="number"]::placeholder {
+#auth-page input[type="email"]::placeholder,
+#auth-page input[type="password"]::placeholder,
+#auth-page input[type="text"]::placeholder,
+#auth-page input[type="number"]::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
 
-input[type="email"]:focus,
-input[type="password"]:focus,
-input[type="text"]:focus,
-input[type="number"]:focus {
+#auth-page input[type="email"]:focus,
+#auth-page input[type="password"]:focus,
+#auth-page input[type="text"]:focus,
+#auth-page input[type="number"]:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
   background-color: rgba(0, 0, 0, 0.3);
 }
 
-.btn {
+#auth-page .btn {
   padding: 12px;
   border: none;
   border-radius: 10px;
@@ -141,23 +150,23 @@ input[type="number"]:focus {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.btn:hover:not(:disabled) {
+#auth-page .btn:hover:not(:disabled) {
   transform: translateY(-3px);
   box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
 }
 
-.btn:active:not(:disabled) {
+#auth-page .btn:active:not(:disabled) {
   transform: translateY(-1px);
 }
 
-.btn:disabled {
+#auth-page .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
 
-.resend-btn {
+#auth-page .resend-btn {
   background-color: transparent;
   border: 1px solid var(--primary-color-light);
   color: var(--primary-color-light);
@@ -170,17 +179,17 @@ input[type="number"]:focus {
   transition: all 0.3s ease;
 }
 
-.resend-btn:hover:not(:disabled) {
-  background-color: rgba(157, 78, 221, 0.2); /* 主题色的半透明背景 */
+#auth-page .resend-btn:hover:not(:disabled) {
+  background-color: rgba(157, 78, 221, 0.2);
   color: white;
 }
 
-.resend-btn:disabled {
+#auth-page .resend-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.success {
+#auth-page .success {
   color: white;
   background-color: rgba(40, 167, 69, 0.4);
   padding: 10px;
@@ -193,13 +202,13 @@ input[type="number"]:focus {
 
 
 /* --- 5. 错误提示与链接样式 --- */
-.error,
-.pass-error {
+#auth-page .error,
+#auth-page .pass-error {
   color: white;
   background-color: rgba(255, 77, 77, 0.4);
   padding: 10px;
   border-radius: 8px;
-  margin-top: -10px; /* 减少与上方元素的间距 */
+  margin-top: -10px;
   margin-bottom: 10px;
   max-width: 3500px;
   font-size: 0.9rem;
@@ -207,24 +216,24 @@ input[type="number"]:focus {
   border: 1px solid var(--error-color);
 }
 
-.pass-error {
-  margin-top: 5px; /* 密码错误提示与输入框间距 */
+#auth-page .pass-error {
+  margin-top: 5px;
   margin-bottom: 0;
 }
 
-p {
+#auth-page p {
   margin-top: 25px;
   font-size: 0.9rem;
 }
 
-p a {
+#auth-page p a {
   color: var(--primary-color-light);
   font-weight: 600;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
-p a:hover {
+#auth-page p a:hover {
   text-decoration: underline;
   color: white;
 }
@@ -232,12 +241,12 @@ p a:hover {
 
 /* --- 6. 响应式设计 --- */
 @media (max-width: 480px) {
-  .container {
+  #auth-page .container {
     padding: 30px;
     margin: 15px;
   }
 
-  h1 {
+  #auth-page h1 {
     font-size: 2rem;
   }
 }

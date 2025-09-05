@@ -70,6 +70,7 @@ function Registration () {
     };
 
     return(
+        <div id="auth-page">
         <div className="container">
             <h1>Sign up</h1>
             <div className="submit-form">
@@ -130,6 +131,7 @@ function Registration () {
             <p>
                 Already have an account? <Link to="/login">Log in</Link>
             </p>
+        </div>
         </div>
     )
 };
