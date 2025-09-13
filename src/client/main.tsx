@@ -1,28 +1,70 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import './client.css'
-import axios from 'axios'
+import axios from 'axios';
 import apiClient from "../axiosConfig";
 import type { Language, Model } from "./def";
+import './client.css'
 
 interface UserDetails {
-    email: string;
+    user_email: string;
     api_key: string | null;
     language: string | null;
 };
 
+interface ScoringResponse {
+    Overall_score: number;
+    TR: number;
+    LR: number;
+    CC: number;
+    GRA: number;
+    reason: string;
+    improvement: string;
+}
+
 const availableLanguages: Language[] = [
-    {code: 'English', name: 'English'},
-    {code: 'French', name: 'French'},
-    {code: 'Chinese', name: 'Chinese (simplified)'},
-    {code: 'Spanish', name: 'Spanish'},
-    {code: 'Japenese', name: 'Janpanese'},
+    { code: 'English', name: 'English' },
+    { code: 'French', name: 'French' },
+    { code: 'Chinese', name: 'Chinese (simplified)' },
+    { code: 'Spanish', name: 'Spanish' },
+    { code: 'Japenese', name: 'Japanese' },
 ];
 
 const availableModels: Model[] = [
-    {id: 'gemini-2.5-flash', name: 'Gemini 2.5 flash'},
-    {id: 'gemini-2.5-pro', name: 'Gemini 2.5 pro'},
+    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
 ];
+
+const GearIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-1.007 1.113-1.113l.448-.113c.542-.135 1.092.198 1.385.646l.293.44c.292.44.833.646 1.385.646h.448c.542 0 1.007.465 1.113 1.113l.113.448c.135.542-.198 1.092-.646 1.385l-.44.293c-.44.292-.646.833-.646 1.385v.448c0 .542.465 1.007 1.113 1.113l.448.113c.542.135 1.092-.198 1.385-.646l.293-.44c.292-.44.833-.646 1.385-.646h.448c.542 0 1.007.465 1.113 1.113l.113.448c.135.542-.198 1.092-.646 1.385l-.44.293c-.44.292-.646.833-.646 1.385v.448c0 .542.465 1.007 1.113 1.113l.448.113c.542.135 1.092-.198 1.385-.646l.293-.44c.292-.44.833-.646 1.385-.646h.448c.542 0 1.007.465 1.113 1.113l.113.448c.135.542-.198 1.092-.646 1.385l-.44.293c-.44.292-.646.833-.646 1.385v.448c0 .542.465 1.007 1.113 1.113l.448.113c.542.135.198 1.092-.646 1.385l-.44.293c-.44.292-.833.646-1.385.646h-.448c-.542 0-1.007-.465-1.113-1.113l-.113-.448c-.135-.542.198-1.092.646-1.385l.44-.293c.44-.292.646-.833.646-1.385v-.448c0-.542-.465-1.007-1.113-1.113l-.448-.113c-.542-.135-1.092.198-1.385.646l-.293.44c-.292.44-.833.646-1.385.646h-.448c-.542 0-1.007-.465-1.113-1.113l-.113-.448c-.135-.542.198-1.092.646-1.385l.44-.293c.44-.292.646-.833.646-1.385v-.448c0-.542-.465-1.007-1.113-1.113l-.448-.113c-.542-.135-.198-1.092.646-1.385l.44-.293c.44-.292.833-.646 1.385.646h.448c.542 0 1.007.465 1.113 1.113l.113.448c.135.542-.198 1.092-.646 1.385l-.44.293c-.44.292-.646.833-.646 1.385v.448c0 .542.465 1.007 1.113 1.113l.448.113c.542.135 1.092-.198 1.385-.646l.293-.44c.293-.44.833-.646 1.385-.646h.448c.542 0 1.007.465 1.113 1.113l.113.448c.135.542-.198 1.092-.646 1.385l-.44.293c-.44.292-.646.833-.646 1.385v.448c0 .542.465 1.007 1.113 1.113l.448.113c.542.135.198 1.092-.646 1.385l-.44.293c-.44.292-.833.646-1.385.646h-.448c-.542 0-1.007-.465-1.113-1.113l-.113-.448c-.135-.542.198-1.092.646-1.385l.44-.293c.44-.292.646-.833.646-1.385v-.448c0-.542-.465-1.007-1.113-1.113l-.448-.113c-.542-.135-1.092.198-1.385.646l-.293.44c-.292-.44-.833-.646-1.385.646h-.448c-.542 0-1.007-.465-1.113-1.113l-.113-.448c-.135-.542.198-1.092.646-1.385l.44-.293c.44-.292.646-.833.646-1.385v-.448z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+);
+
+const TrashIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+    </svg>
+);
+
+const ChevronDownIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+    </svg>
+);
+
+const EyeIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+);
+
+const EyeSlashIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.243 4.243L6.228 6.228" />
+    </svg>
+);
 
 function Main() {
     const [topic, setTopic] = useState<string>('');
@@ -31,7 +73,7 @@ function Main() {
     const [language, setLanguage] = useState<string>('English');
     const [apiKey, setApiKey] = useState<string>('');
     const [userEmail, setUserEmail] = useState<string>('');
-    const [apiState, setApiState] = useState<{ // A more efficient react state updater, https://react.dev/learn/updating-objects-in-state#updating-a-nested-object
+    const [apiState, setApiState] = useState<{
         loading: boolean;
         error: string | null;
         success: string | null;
@@ -51,137 +93,98 @@ function Main() {
     const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
 
     const resultsRef = useRef<HTMLDivElement>(null);
-
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
-            try{
-                const response = await apiClient.get<UserDetails>('/api/main/user/me')
-                const {email, api_key, language} = response.data
-                setUserEmail(email)
+            try {
+                const response = await apiClient.get<UserDetails>('/api/main/info/')
+                const { user_email, api_key, language } = response.data
+                setUserEmail(user_email)
                 if (api_key) setApiKey(api_key);
                 if (language) setLanguage(language);
             } catch (err) {
-                if (axios.isAxiosError(err)){
+                if (axios.isAxiosError(err)) {
                     if (err.response?.status === 401) {
                         navigate('/login')
                     } else {
-                    const serverError = err.response?.data?.detail || 'Something went wrong'
-                    setApiState(prev => ({...prev, error: serverError}))
+                        const serverError = err.response?.data?.detail || 'Something went wrong while fetching user data.'
+                        setApiState(prev => ({ ...prev, error: serverError }))
                     }
                 }
             };
         };
         fetchData()
-    }, []);
-    // Auto-scroll effect
+    }, [navigate]);
+
     useEffect(() => {
         if (apiState.score && resultsRef.current) {
             resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }, [apiState.score]);
-
-    const update_data = async (e: {preventDefault: () => void}) => {
+    
+    const update_data = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        const playload = {language: language, api_key: apiKey}
-
+        const payload = { user_language: language, api_key: apiKey }
         setUpdateLoading(true);
-        setApiState(prev => ({...prev, error: null, success: null}));
-
-        try{
-            const response = await apiClient.post('/api/storage', playload)
-            console.log("storage success", response.data)
-            setApiState(prev => ({...prev, success:"Settings updated successfully!"}));
-        } catch(err) {
+        setApiState(prev => ({ ...prev, error: null, success: null }));
+        try {
+            await apiClient.post('/api/main/storage/', payload)
+            setApiState(prev => ({ ...prev, success: "Settings updated successfully!" }));
+            setTimeout(() => {
+                setIsSettingsOpen(false);
+                setApiState(prev => ({ ...prev, success: null }));
+            }, 1500);
+        } catch (err) {
             if (axios.isAxiosError(err)) {
-                const serverError = err.response?.data?.detail || 'Something went wrong'                
-                setApiState(prev => ({...prev, error: serverError}));
+                const serverError = err.response?.data?.detail || 'Failed to update settings.'
+                setApiState(prev => ({ ...prev, error: serverError }));
             };
         } finally {
             setUpdateLoading(false);
         };
     };
 
-    interface ScoringResponse {
-    Overall_score: number;
-    TR: number;
-    LR: number;
-    CC: number;
-    GRA: number;
-    reason: string;
-    improvement: string;
-}
-
     const scoring = async () => {
-
-        if (!topic.trim() && !essay.trim()){
-            setApiState(prev => ({...prev, error: "Nothing here"}));
-            return;
-        };
-
-        if (!topic.trim()){
-            setApiState(prev => ({...prev, error: "You forget to enter the topic"}));
-            return;
-        };
-
-        if (!essay.trim()){
-            setApiState(prev => ({...prev, error: "Where's the essay?"}));
-            return;
-        };
-
-
+        if (!topic.trim() && !essay.trim()) { setApiState(prev => ({ ...prev, error: "Topic and Essay fields are empty." })); return; };
+        if (!topic.trim()) { setApiState(prev => ({ ...prev, error: "Please enter the essay topic." })); return; };
+        if (!essay.trim()) { setApiState(prev => ({ ...prev, error: "Please enter your essay." })); return; };
         setApiState({ loading: true, error: null, success: null, score: null });
-
-
-        try{
-            const params = {
-                selected_model: model,
-                topic_input: topic,
-                essay_input: essay,
-                };    
-
-
-            const response = await apiClient.post<ScoringResponse>('/api/response', params);
-            console.log("success", response.data)
-            setApiState(prev => ({...prev, loading: false, score: response.data})) // In HTML part , use apiState.score.CC to fetch data 
-
-        } catch(err) {
-            if (axios.isAxiosError(err)){
-                const serverError = err.response?.data?.detail || 'Something went wrong'
-                setApiState(prev => ({...prev, error: serverError}));
-            };
-        } finally {
-            setApiState(prev => ({...prev, loading: false}));
+        try {
+            const params = { model: model, input_topic: topic, input_essay: essay };
+            const response = await apiClient.post<ScoringResponse>('/api/main/response/', params);
+            setApiState(prev => ({ ...prev, loading: false, score: response.data }))
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                const serverError = err.response?.data?.detail || 'An error occurred during scoring.'
+                setApiState(prev => ({ ...prev, loading: false, error: serverError }));
+            } else {
+                setApiState(prev => ({ ...prev, loading: false, error: 'An unexpected error occurred' }));
+            }
         };
-
     };
 
     const Logout = () => {
-        setLogoutLoading(false);
-        setApiState(prev => ({...prev, success: null, error: null}));
-
-        try{
+        setLogoutLoading(true);
+        setApiState(prev => ({ ...prev, success: null, error: null }));
+        try {
             localStorage.removeItem('accessToken')
-            setApiState(prev => ({...prev, success: "Logout success"}));
             navigate('/login')
-        } catch(err) {
+        } catch (err) {
             console.log(err);
-            setApiState(prev => ({...prev, error:"Logout failed"}));
-        } finally {
+            setApiState(prev => ({ ...prev, error: "Logout failed" }));
             setLogoutLoading(false);
-        };
+        }
     };
 
     const handleDeleteAccount = async () => {
         if (window.confirm("Are you absolutely sure? This action cannot be undone and will permanently delete your account.")) {
             setDeleteLoading(true);
-            setApiState(prev => ({...prev, error: null, success: null}));
+            setApiState(prev => ({ ...prev, error: null, success: null }));
             try {
-                await apiClient.delete('/api/main/user/delete'); 
-                localStorage.removeItem('accessToken'); 
-                navigate('/login'); 
+                await apiClient.delete('/api/main/user/delete');
+                localStorage.removeItem('accessToken');
+                navigate('/login');
             } catch (err) {
                 if (axios.isAxiosError(err)) {
                     const serverError = err.response?.data?.detail || 'Failed to delete account.';
@@ -195,163 +198,204 @@ function Main() {
     const clearInputs = () => {
         setTopic('');
         setEssay('');
-        setApiState(prev => ({ ...prev, error: null, score: null }));
+        setApiState(prev => ({ ...prev, error: null, score: null, success: null }));
     };
 
-    // --- SVG Icons
-    const GearIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M19.829 15.222c-.655-1.134-.655-2.51 0-3.644.473-.817 1.25-1.422 2.171-1.674v-2.73a.25.25 0 0 0-.203-.246l-2.31-.577a.25.25 0 0 1-.219-.245v-2.31a.25.25 0 0 0-.246-.203h-2.73c-.252.92-.857 1.698-1.674 2.171-1.134.655-2.51.655-3.644 0-.817-.473-1.422-1.25-1.674-2.171h-2.73a.25.25 0 0 0-.246.203v2.31c0 .108-.07.204-.176.236l-2.348.586a.25.25 0 0 0-.203.246v2.73c.92.252 1.698.857 2.171 1.674.655 1.134.655 2.51 0 3.644-.473.817-1.25 1.422-2.171 1.674v2.73a.25.25 0 0 0 .203.246l2.31.577c.101.025.188.112.219.219v2.31a.25.25 0 0 0 .246.203h2.73c.252-.92.857-1.698 1.674-2.171 1.134-.655 2.51-.655 3.644 0 .817.473 1.422 1.25 1.674 2.171h2.73a.25.25 0 0 0 .246-.203v-2.31a.25.25 0 0 1 .219-.245l2.31-.577a.25.25 0 0 0 .203-.246v-2.73c-.92-.252-1.698-.857-2.171-1.674ZM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg>;
-    const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.006a.75.75 0 0 1-.742.742H5.625a.75.75 0 0 1-.742-.742L3.879 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.385 3.965a.75.75 0 0 1 .623.722v10.75a.75.75 0 0 1-1.5 0V7.713a.75.75 0 0 1 .877-.722ZM12 6.963a.75.75 0 0 1 .75.75v10.75a.75.75 0 0 1-1.5 0V7.713a.75.75 0 0 1 .75-.75Zm3.385.722a.75.75 0 0 0-.877.722v10.75a.75.75 0 0 0 1.5 0V7.713a.75.75 0 0 0-.623-.722Z" clipRule="evenodd"/></svg>;
-    const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" /><path fillRule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113C21.182 17.022 16.97 20.25 12.001 20.25c-4.97 0-9.185-3.223-10.675-7.69a.75.75 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clipRule="evenodd" /></svg>;
-    const EyeSlashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path fillRule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l18 18a.75.75 0 1 0 1.06-1.06l-18-18ZM10.72 10.72a3 3 0 0 0 2.56 2.56l-2.56-2.56Zm-3.44 1.78a5.25 5.25 0 0 0 6.88 6.88l-6.88-6.88Zm10.4 1.08-3.52-3.52a5.25 5.25 0 0 0-6.34-6.34L3.98 3.98C2.59 5.39 1.45 7.21.81 9.19c-.75 2.36-.75 4.88 0 7.24 1.49 4.47 5.7 7.69 10.67 7.69 1.57 0 3.09-.28 4.52-.8L17.66 13.58Z" clipRule="evenodd" /></svg>;
-    const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" /></svg>;
+    const handleSelectModel = (modelId: string) => {
+        setModel(modelId);
+        setIsModelDropdownOpen(false);
+    };
+
+    const handleSelectLanguage = (langCode: string) => {
+        setLanguage(langCode);
+        setIsLangDropdownOpen(false);
+    };
+
     return (
-        <div id="main-page">
-        <div className="main-container">
-            <header className="sticky-header">
-                <div className="header-controls">
-                    {/* Model Dropdown */}
-                    <div className="custom-dropdown">
-                        <button onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)} className="dropdown-button">
-                            {availableModels.find(m => m.id === model)?.name || 'Select Model'}
-                            <span className={`chevron ${isModelDropdownOpen ? 'open' : ''}`}><ChevronDownIcon /></span>
-                        </button>
-                        <ul className={`dropdown-menu ${isModelDropdownOpen ? 'open' : ''}`}>
-                            {availableModels.map((m) => (
-                                <li key={m.id} onClick={() => { setModel(m.id); setIsModelDropdownOpen(false); }}>
-                                    {m.name}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Language Dropdown */}
-                    <div className="custom-dropdown">
-                        <button onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)} className="dropdown-button">
-                            {availableLanguages.find(l => l.code === language)?.name || 'Select Language'}
-                            <span className={`chevron ${isLangDropdownOpen ? 'open' : ''}`}><ChevronDownIcon /></span>
-                        </button>
-                        <ul className={`dropdown-menu ${isLangDropdownOpen ? 'open' : ''}`}>
-                            {availableLanguages.map((l) => (
-                                <li key={l.code} onClick={() => { setLanguage(l.code); setIsLangDropdownOpen(false); }}>
-                                    {l.name}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-
-                <div className="settings-container">
-                    <button onClick={() => setIsSettingsOpen(!isSettingsOpen)} className="icon-button settings-button">
-                        <GearIcon />
-                    </button>
-                    <div className={`settings-panel ${isSettingsOpen ? 'open' : ''}`}>
-                        <p className="user-email">Logged in as: <strong>{userEmail}</strong></p>
-                        <form onSubmit={update_data}>
-                            <label htmlFor="api-key">Gemini API Key</label>
-                            <div className="api-key-wrapper">
-                                <input
-                                    id="api-key"
-                                    type={isApiKeyVisible ? 'text' : 'password'}
-                                    value={apiKey}
-                                    onChange={(e) => setApiKey(e.target.value)}
-                                    placeholder="Enter your API Key"
-                                />
-                                <button type="button" onClick={() => setIsApiKeyVisible(!isApiKeyVisible)} className="icon-button eye-button">
-                                    {isApiKeyVisible ? <EyeSlashIcon /> : <EyeIcon />}
+        <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
+            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg shadow-sm">
+                <div className="container mx-auto px-6 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-6">
+                        <h1 className="text-xl font-bold text-red-600">IELTS™ Scorer</h1>
+                        <div className="hidden md:flex items-center gap-4">
+                            <div className="relative">
+                                <button onClick={() => setIsModelDropdownOpen(prev => !prev)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer disabled:cursor-not-allowed">
+                                    {availableModels.find(m => m.id === model)?.name || 'Select Model'}
+                                    <ChevronDownIcon className={`w-4 h-4 transition-transform ${isModelDropdownOpen ? 'rotate-180' : ''}`} />
                                 </button>
+                                <div className={`absolute top-full mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 origin-top-right transition-all duration-200 ease-out ${isModelDropdownOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+                                    <div className="py-1">
+                                        {availableModels.map(m => (
+                                            <button key={m.id} onClick={() => handleSelectModel(m.id)} className="w-full text-left block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer disabled:cursor-not-allowed">
+                                                {m.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
-                            <button type="submit" className="button-primary" disabled={updateLoading}>
-                                {updateLoading ? 'Saving...' : 'Save Settings'}
-                            </button>
-                        </form>
-                        <hr />
-                        <div className="danger-zone">
-                            <button onClick={Logout} className="button-danger" disabled={logoutLoading}>
-                                {logoutLoading ? 'Logging out...' : 'Log Out'}
-                            </button>
-                            <button onClick={handleDeleteAccount} className="button-danger" disabled={deleteLoading}>
-                                {deleteLoading ? 'Deleting...' : 'Delete Account'}
-                            </button>
+                            <div className="relative">
+                                <button onClick={() => setIsLangDropdownOpen(prev => !prev)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer disabled:cursor-not-allowed">
+                                    {availableLanguages.find(l => l.code === language)?.name || 'Select Language'}
+                                    <ChevronDownIcon className={`w-4 h-4 transition-transform ${isLangDropdownOpen ? 'rotate-180' : ''}`} />
+                                </button>
+                                <div className={`absolute top-full mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 origin-top-right transition-all duration-200 ease-out ${isLangDropdownOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+                                    <div className="py-1">
+                                        {availableLanguages.map(l => (
+                                            <button key={l.code} onClick={() => handleSelectLanguage(l.code)} className="w-full text-left block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer disabled:cursor-not-allowed">
+                                                {l.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="relative">
+                        <button onClick={() => setIsSettingsOpen(prev => !prev)} className="p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer disabled:cursor-not-allowed">
+                            <GearIcon className="w-6 h-6 text-slate-600" />
+                        </button>
+                        <div className={`absolute top-full right-0 mt-2 w-72 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 origin-top-right transition-all duration-300 ease-in-out ${isSettingsOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+                           <form onSubmit={update_data} className="p-4 space-y-4">
+                                <div className="border-b pb-2">
+                                    <p className="text-sm font-medium text-slate-900">Account</p>
+                                    <p className="text-sm text-slate-500 truncate">{userEmail}</p>
+                                </div>
+                                <div>
+                                    <label htmlFor="api_key" className="block text-sm font-medium text-slate-700 mb-1">Google AI API Key</label>
+                                    <div className="relative">
+                                        <input 
+                                            id="api_key" 
+                                            type={isApiKeyVisible ? 'text' : 'password'} 
+                                            value={apiKey}
+                                            onChange={(e) => setApiKey(e.target.value)}
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                                        />
+                                        <button type="button" onClick={() => setIsApiKeyVisible(prev => !prev)} className="absolute inset-y-0 right-0 px-3 text-slate-400 cursor-pointer disabled:cursor-not-allowed">
+                                            {isApiKeyVisible ? <EyeSlashIcon className="w-5 h-5"/> : <EyeIcon className="w-5 h-5"/>}
+                                        </button>
+                                    </div>
+                                </div>
+                                <button type="submit" disabled={updateLoading} className="w-full bg-slate-800 text-white font-semibold py-2 px-4 rounded-md hover:bg-slate-700 disabled:bg-slate-400 transition-colors flex items-center justify-center cursor-pointer disabled:cursor-not-allowed">
+                                    {updateLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : 'Update Settings'}
+                                </button>
+                                <div className="border-t pt-4 space-y-2">
+                                     <button type="button" onClick={Logout} disabled={logoutLoading} className="w-full bg-red-50 text-red-600 font-semibold py-2 px-4 rounded-md hover:bg-red-100 disabled:opacity-50 transition-colors flex items-center justify-center cursor-pointer disabled:cursor-not-allowed">
+                                        {logoutLoading ? <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div> : 'Log Out'}
+                                    </button>
+                                    <button type="button" onClick={handleDeleteAccount} disabled={deleteLoading} className="w-full text-red-600 text-sm font-medium hover:underline disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed">
+                                        {deleteLoading ? 'Deleting...' : 'Delete Account'}
+                                    </button>
+                                </div>
+                           </form>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <main className="content-area">
-                <div className="input-card">
-                    <div className="topic-wrapper">
-                        <input
-                            type="text"
-                            value={topic}
-                            onChange={(e) => setTopic(e.target.value)}
-                            placeholder="Enter the essay topic here..."
-                            className="topic-input"
-                        />
-                        <button onClick={() => setTopic('')} className="icon-button clear-topic-button">
-                            <TrashIcon />
-                        </button>
+            <main className="container mx-auto p-6 md:p-12">
+                <div className="max-w-3xl mx-auto space-y-8">
+                    {apiState.error && (
+                         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+                            <p className="font-bold">Error</p>
+                            <p>{apiState.error}</p>
+                        </div>
+                    )}
+                    {apiState.success && (
+                        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md" role="alert">
+                            <p className="font-bold">Success</p>
+                            <p>{apiState.success}</p>
+                        </div>
+                    )}
+
+                    <div>
+                        <label htmlFor="topic" className="block text-lg font-semibold text-slate-800 mb-2">Essay Topic</label>
+                        <div className="relative">
+                            <textarea
+                                id="topic"
+                                value={topic}
+                                onChange={(e) => setTopic(e.target.value)}
+                                placeholder="e.g., Some people think that parents should teach children how to be good members of society. Others, however, believe that school is the place to learn this. Discuss both these views and give your own opinion."
+                                className="w-full h-28 p-4 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
+                                rows={3}
+                            />
+                            {topic && (
+                                <button onClick={() => setTopic('')} className="absolute top-3 right-3 p-1 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors cursor-pointer disabled:cursor-not-allowed">
+                                    <TrashIcon className="w-5 h-5"/>
+                                </button>
+                            )}
+                        </div>
                     </div>
-
-                    <textarea
-                        value={essay}
-                        onChange={(e) => setEssay(e.target.value)}
-                        placeholder="Paste your essay here..."
-                        className="essay-textarea"
-                    />
-
-                    <div className="actions-bar">
-                         <button onClick={clearInputs} className="button-secondary">
-                            Clear All
+                    
+                    <div>
+                         <label htmlFor="essay" className="block text-lg font-semibold text-slate-800 mb-2">Your Essay</label>
+                         <textarea
+                            id="essay"
+                            value={essay}
+                            onChange={(e) => setEssay(e.target.value)}
+                            placeholder="Start writing your essay here..."
+                            className="w-full h-96 p-4 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
+                            rows={15}
+                        />
+                    </div>
+                    
+                    <div className="flex justify-center gap-4">
+                        <button onClick={clearInputs} className="px-8 py-3 bg-slate-200 text-slate-700 font-bold rounded-full hover:bg-slate-300 transform active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed">
+                           Clear
                         </button>
-                        <button onClick={scoring} className="score-button" disabled={apiState.loading}>
-                            {apiState.loading ? <div className="spinner"></div> : 'Get Score'}
+                         <button onClick={scoring} disabled={apiState.loading} className="px-10 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transform active:scale-95 transition-all disabled:from-slate-400 disabled:to-slate-500 disabled:shadow-none cursor-pointer disabled:cursor-not-allowed">
+                            {apiState.loading ? (
+                                <div className="flex items-center gap-2">
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    <span>Scoring...</span>
+                                </div>
+                            ) : "Get Score"}
                         </button>
                     </div>
                 </div>
 
-                {apiState.error && <div className="error-message">{apiState.error}</div>}
-                {apiState.success && <div className="success-message">{apiState.success}</div>}
-
                 {apiState.score && (
-                    <div className="results-container" ref={resultsRef}>
-                        <div className="overall-score-wrapper">
-                            <p>Overall Score</p>
-                            <h1 className="overall-score">{apiState.score.Overall_score.toFixed(1)}</h1>
-                        </div>
+                    <section ref={resultsRef} className="mt-16 pt-10 max-w-4xl mx-auto animate-fade-in">
+                        <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 bg-cover bg-no-repeat" style={{backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke-width='2' stroke='rgb(254 226 226)'%3e%3cpath d='M0 .5 L31.5 .5 M.5 0 V31.5'/%3e%3c/svg%3e\")"}}>
+                           <div className="text-center mb-10">
+                                <h2 className="text-2xl font-light text-slate-600">Overall Score</h2>
+                                <p className="text-9xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-red-600 to-orange-500">{apiState.score.Overall_score.toFixed(1)}</p>
+                           </div>
 
-                        <div className="score-grid">
-                            <div className="score-card">
-                                <h3>Task Response</h3>
-                                <p>{apiState.score.TR.toFixed(1)}</p>
-                            </div>
-                            <div className="score-card">
-                                <h3>Lexical Resource</h3>
-                                <p>{apiState.score.LR.toFixed(1)}</p>
-                            </div>
-                            <div className="score-card">
-                                <h3>Coherence & Cohesion</h3>
-                                <p>{apiState.score.CC.toFixed(1)}</p>
-                            </div>
-                            <div className="score-card">
-                                <h3>Grammatical Range & Accuracy</h3>
-                                <p>{apiState.score.GRA.toFixed(1)}</p>
-                            </div>
-                        </div>
+                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                                <div className="bg-slate-50/50 p-6 rounded-xl border border-slate-200/80 text-center">
+                                    <h3 className="font-semibold text-slate-500 mb-1">Task Response (TR)</h3>
+                                    <p className="text-5xl font-bold text-red-500">{apiState.score.TR.toFixed(1)}</p>
+                                </div>
+                                <div className="bg-slate-50/50 p-6 rounded-xl border border-slate-200/80 text-center">
+                                    <h3 className="font-semibold text-slate-500 mb-1">Coherence & Cohesion (CC)</h3>
+                                    <p className="text-5xl font-bold text-red-500">{apiState.score.CC.toFixed(1)}</p>
+                                </div>
+                                <div className="bg-slate-50/50 p-6 rounded-xl border border-slate-200/80 text-center">
+                                    <h3 className="font-semibold text-slate-500 mb-1">Lexical Resource (LR)</h3>
+                                    <p className="text-5xl font-bold text-red-500">{apiState.score.LR.toFixed(1)}</p>
+                                </div>
+                                <div className="bg-slate-50/50 p-6 rounded-xl border border-slate-200/80 text-center">
+                                    <h3 className="font-semibold text-slate-500 mb-1">Grammatical Range & Accuracy (GRA)</h3>
+                                    <p className="text-5xl font-bold text-red-500">{apiState.score.GRA.toFixed(1)}</p>
+                                </div>
+                           </div>
 
-                        <div className="feedback-section">
-                            <h2>Reason</h2>
-                            <p>{apiState.score.reason}</p>
+                           <div className="space-y-8">
+                               <div>
+                                    <h3 className="text-xl font-bold text-slate-800 mb-3 pb-2 border-b-2 border-orange-500 inline-block">Reason for Score</h3>
+                                    <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">{apiState.score.reason}</p>
+                               </div>
+                               <div>
+                                    <h3 className="text-xl font-bold text-slate-800 mb-3 pb-2 border-b-2 border-orange-500 inline-block">Areas for Improvement</h3>
+                                    <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">{apiState.score.improvement}</p>
+                               </div>
+                           </div>
                         </div>
-                        <div className="feedback-section">
-                            <h2>Improvement</h2>
-                            <p>{apiState.score.improvement}</p>
-                        </div>
-                    </div>
+                    </section>
                 )}
             </main>
-        </div>
         </div>
     );
 }
 
-export default Main
+export default Main;

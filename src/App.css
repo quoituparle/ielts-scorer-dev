@@ -1,13 +1,1 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
-
-:root {
-  --primary-color: #8a2be2; /* 紫罗兰色，用作强调色 */
-  --primary-color-light: #9d4edd;
-  --error-color: #ff4d4d;
-  --text-color: #f0f0f0;
-  --bg-color-start: #1c1c3c;
-  --bg-color-end: #2a2a5a;
-  --container-bg: rgba(255, 255, 255, 0.1);
-  --input-bg: rgba(0, 0, 0, 0.2);
-  --success-color: #28a745;
-}
