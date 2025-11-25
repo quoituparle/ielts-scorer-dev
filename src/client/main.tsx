@@ -169,7 +169,6 @@ function Main() {
                     } else {
                         const serverError = err.response?.data?.detail || 'Something went wrong while fetching user data.'
                         setApiState(prev => ({ ...prev, error: serverError }))
-                        navigate('/login')
                     }
                 }
             };
