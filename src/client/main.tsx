@@ -22,6 +22,16 @@ interface ScoringResponse {
     improvement: string;
 }
 
+interface PublishEssay {
+    Overall_score: number;
+    TR: number;
+    LR: number;
+    CC: number;
+    GRA: number;
+    reason?: string;
+    improvement?: string;
+}
+
 const availableLanguages: Language[] = [
     { code: 'English', name: 'English' },
     { code: 'French', name: 'French' },
@@ -132,6 +142,7 @@ function Main() {
     const [language, setLanguage] = useState<string>('English');
     const [apiKey, setApiKey] = useState<string>('');
     const [userEmail, setUserEmail] = useState<string>('');
+    const [topicId, setTopicId] = useState<string | null>(null);
     const [apiState, setApiState] = useState<{
         loading: boolean;
         error: string | null;
@@ -146,6 +157,7 @@ function Main() {
     const [updateLoading, setUpdateLoading] = useState<boolean>(false);
     const [logoutLoading, setLogoutLoading] = useState<boolean>(false);
     const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+    const [publishLoading, setPublishLoading] = useState<boolean>(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
     const [isApiKeyVisible, setIsApiKeyVisible] = useState<boolean>(false);
     const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
@@ -220,6 +232,24 @@ function Main() {
         };
     };
     
+    const PostEssay = async (topic_id: string) => {
+        if (topic_id === null) {
+            setApiState(p => ({...p, error: 'This essay cannot publish'}))
+        }
+        setPublishLoading(true)
+        setApiState(p => ({...p, error: null, success: null}));
+        try{
+            await apiClient.post<PublishEssay>(`/main/topic/${topic_id}/essays/`)
+        } catch(err) {
+            if (axios.isAxiosError(err)) {
+                const serverError = err.request?.data?.detail || 'Failed to publish essay.'
+                setApiState(p => ({ ...p, error: serverError}))
+            };
+        } finally {
+            setPublishLoading(false);
+        };
+    };
+    
 
     const scoring = async () => {
         if (!topic.trim() && !essay.trim()) { setApiState(prev => ({ ...prev, error: "Topic and Essay fields are empty." })); return; };
@@ -286,6 +316,7 @@ function Main() {
         setLanguage(langCode);
         setIsLangDropdownOpen(false);
     };
+
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
