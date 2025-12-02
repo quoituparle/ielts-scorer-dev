@@ -39,9 +39,9 @@ function Verification () {
         try {
             const data = { email, code };
             await apiClient.post('/verify-email', data);
-            setSuccess('Verification successful! Redirecting to login...');
+            setSuccess('Verification successful!');
             setTimeout(() => {
-                navigate('/login');
+                navigate('/');
             }, 2000);
         } catch (err) {
             if (axios.isAxiosError(err)) {

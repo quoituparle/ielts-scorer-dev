@@ -11,12 +11,21 @@ interface Topic {
     topic: string;
 }
 
+// 修改：根据 views.py 的结构更新 Essay 接口
 interface Essay {
     essay_id: string;
     user_id: string;
     content: string;
-    score: string;
     published_date: string;
+    // 扁平化的分数结构
+    Overall_score: number;
+    TR: number;
+    LR: number;
+    CC: number;
+    GRA: number;
+    reason: string;
+    improvement: string;
+
     author?: {
         username?: string;
         email?: string;
@@ -29,19 +38,8 @@ interface RankData {
     time_rank: Essay[];
 }
 
-interface ParsedScore {
-    Overall_score: number;
-    TR: number;
-    LR: number;
-    CC: number;
-    GRA: number;
-    reason?: string;
-    improvement?: string;
-}
-
 // --- Icons (Reused & New) ---
 
-// 1. 新增：房屋图标
 const HomeIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -93,7 +91,6 @@ const AnimatedNumber = ({ value, duration = 1500 }: { value: number, duration?: 
         const animate = (currentTime: number) => {
             if (!startTime) startTime = currentTime;
             const progress = Math.min((currentTime - startTime) / duration, 1);
-            const ease = 1 - Math.pow(1 - progress, 4);
             setDisplayValue(progress * value);
             if (progress < 1) animationFrameId = requestAnimationFrame(animate);
             else setDisplayValue(value);
@@ -121,27 +118,6 @@ const ScoreBar = ({ label, score }: { label: string, score: number }) => {
 
 // --- Helper Functions ---
 
-const parseScoreString = (scoreStr: string): ParsedScore | null => {
-    try {
-        const parsed = JSON.parse(scoreStr);
-        if (typeof parsed === 'object' && parsed !== null && 'Overall_score' in parsed) {
-            return parsed as ParsedScore;
-        }
-        return null;
-    } catch (e) {
-        const num = parseFloat(scoreStr);
-        if (!isNaN(num)) {
-            return {
-                Overall_score: num,
-                TR: 0, LR: 0, CC: 0, GRA: 0,
-                reason: "Detailed breakdown not available.",
-                improvement: ""
-            };
-        }
-        return null;
-    }
-};
-
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -164,7 +140,6 @@ function Playground() {
     const [selectedEssay, setSelectedEssay] = useState<Essay | null>(null);
     const [rankSort, setRankSort] = useState<'score' | 'time'>('score');
 
-    // 2. 新增：通用的右上角主页按钮组件
     const HomeFloatingButton = () => (
         <button
             onClick={() => navigate('/')}
@@ -236,11 +211,10 @@ function Playground() {
     if (viewState === 'list') {
         return (
             <div className="min-h-screen bg-slate-50 font-sans text-slate-800 p-6 md:p-12 relative">
-                 {/* 3. 应用：添加到列表页 */}
                  <HomeFloatingButton />
                  
                  <div className="max-w-6xl mx-auto">
-                    <header className="mb-10 text-center md:text-left pr-16"> {/* pr-16 避免被按钮遮挡 */}
+                    <header className="mb-10 text-center md:text-left pr-16">
                         <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center justify-center md:justify-start gap-3">
                             <span className="p-2 bg-orange-100 rounded-lg text-orange-600"><ChartBarIcon className="w-8 h-8"/></span>
                             Topic Playground
@@ -284,7 +258,6 @@ function Playground() {
     if (viewState === 'topic_detail' && selectedTopic) {
         return (
             <div className="min-h-screen bg-slate-50 flex flex-col relative">
-                {/* 3. 应用：添加到话题详情页 */}
                 <HomeFloatingButton />
 
                 <div className="flex-1 container mx-auto p-6 md:p-12 flex items-center justify-center">
@@ -334,7 +307,6 @@ function Playground() {
 
         return (
             <div className="min-h-screen bg-slate-50 p-6 md:p-8 relative">
-                 {/* 3. 应用：添加到排行榜页 */}
                  <HomeFloatingButton />
 
                  <div className="max-w-4xl mx-auto bg-white min-h-[80vh] rounded-3xl shadow-xl border border-slate-100 overflow-hidden flex flex-col">
@@ -364,8 +336,8 @@ function Playground() {
                             <div className="text-center py-20 text-slate-400">No essays submitted yet.</div>
                         ) : (
                             essays.map((e, index) => {
-                                const parsed = parseScoreString(e.score);
-                                const scoreDisplay = parsed ? parsed.Overall_score : 'N/A';
+                                const scoreDisplay = e.Overall_score;
+                                const username = e.user?.username || e.author?.username || "Anonymous User";
                                 
                                 return (
                                     <div 
@@ -380,7 +352,7 @@ function Playground() {
                                             <div>
                                                 <div className="font-semibold text-slate-700 flex items-center gap-2">
                                                     <UserIcon className="w-4 h-4 text-slate-400"/>
-                                                    {e.author?.username || "Anonymous User"}
+                                                    {username}
                                                 </div>
                                                 <div className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
                                                     <ClockIcon className="w-3 h-3"/> {formatDate(e.published_date)}
@@ -389,7 +361,7 @@ function Playground() {
                                         </div>
                                         <div className="text-right">
                                             <div className="text-xl font-bold text-slate-800 group-hover:text-orange-600 transition-colors">
-                                                {typeof scoreDisplay === 'number' ? scoreDisplay.toFixed(1) : scoreDisplay}
+                                                {scoreDisplay.toFixed(1)}
                                             </div>
                                             <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Band</div>
                                         </div>
@@ -405,8 +377,8 @@ function Playground() {
 
     // 5. Essay Detail View
     if (viewState === 'essay_detail' && selectedEssay && selectedTopic) {
-        const parsedScore = parseScoreString(selectedEssay.score);
-        const overall = parsedScore ? parsedScore.Overall_score : 0;
+        const overall = selectedEssay.Overall_score;
+        const username = selectedEssay.user?.username || selectedEssay.author?.username || "Anonymous";
 
         return (
             <div className="min-h-screen bg-slate-50 p-6 md:p-8 relative">
@@ -419,35 +391,28 @@ function Playground() {
                     </button>
 
                     {/* Score Dashboard */}
-                    {parsedScore ? (
-                         <div className="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden">
-                            <div className="bg-slate-900 p-8 text-white flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500 rounded-full blur-[80px] opacity-20 -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                     <div className="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden">
+                        <div className="bg-slate-900 p-8 text-white flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500 rounded-full blur-[80px] opacity-20 -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
-                                <div>
-                                    <h2 className="text-2xl font-bold mb-1">{selectedEssay.author?.username || "Anonymous"}'s Essay</h2>
-                                    <p className="text-slate-400 text-sm">Published on {formatDate(selectedEssay.published_date)}</p>
-                                </div>
-                                <div className="flex flex-col items-center">
-                                    <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-red-500">
-                                        {overall.toFixed(1)}
-                                    </span>
-                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Overall Band</span>
-                                </div>
+                            <div>
+                                <h2 className="text-2xl font-bold mb-1">{username}'s Essay</h2>
+                                <p className="text-slate-400 text-sm">Published on {formatDate(selectedEssay.published_date)}</p>
                             </div>
-                            <div className="p-8 grid grid-cols-2 md:grid-cols-4 gap-4 bg-white">
-                                <ScoreBar label="Task Response" score={parsedScore.TR} />
-                                <ScoreBar label="Coherence" score={parsedScore.CC} />
-                                <ScoreBar label="Lexical" score={parsedScore.LR} />
-                                <ScoreBar label="Grammar" score={parsedScore.GRA} />
+                            <div className="flex flex-col items-center">
+                                <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-red-500">
+                                    {overall.toFixed(1)}
+                                </span>
+                                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Overall Band</span>
                             </div>
-                         </div>
-                    ) : (
-                        <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 text-center">
-                            <h2 className="text-xl font-bold text-slate-700">Overall Score: {selectedEssay.score}</h2>
-                            <p className="text-slate-500 text-sm mt-2">Detailed score breakdown is not available for this essay.</p>
                         </div>
-                    )}
+                        <div className="p-8 grid grid-cols-2 md:grid-cols-4 gap-4 bg-white">
+                            <ScoreBar label="Task Response" score={selectedEssay.TR} />
+                            <ScoreBar label="Coherence" score={selectedEssay.CC} />
+                            <ScoreBar label="Lexical" score={selectedEssay.LR} />
+                            <ScoreBar label="Grammar" score={selectedEssay.GRA} />
+                        </div>
+                     </div>
 
                     {/* Content */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -461,6 +426,23 @@ function Playground() {
                              <div className="prose prose-slate max-w-none text-slate-600 leading-loose whitespace-pre-wrap font-serif">
                                 {selectedEssay.content}
                              </div>
+
+                             {(selectedEssay.reason || selectedEssay.improvement) && (
+                                <div className="mt-8 pt-8 border-t border-slate-100 grid grid-cols-1 gap-6">
+                                    {selectedEssay.reason && (
+                                        <div>
+                                            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Feedback</h4>
+                                            <p className="text-slate-600 text-sm">{selectedEssay.reason}</p>
+                                        </div>
+                                    )}
+                                    {selectedEssay.improvement && (
+                                        <div>
+                                            <h4 className="text-sm font-bold text-orange-400 uppercase tracking-wider mb-2">Improvement</h4>
+                                            <p className="text-slate-600 text-sm">{selectedEssay.improvement}</p>
+                                        </div>
+                                    )}
+                                </div>
+                             )}
                         </div>
                     </div>
                 </div>
