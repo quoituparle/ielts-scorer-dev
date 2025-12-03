@@ -374,7 +374,7 @@ In conclusion, although mathematics plays a key role in developing logical skill
                 <div className="container mx-auto px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-10">
                         <h1 className="text-2xl font-bold tracking-tight text-red-600 flex items-center gap-2">
-                            <span>BANDIFY</span>
+                            <span>BANDSENSE</span>
                         </h1>
                         <div className="hidden md:flex items-center gap-6">
                             {/* Model Selector */}

@@ -84,7 +84,7 @@ function Login() {
             <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg animate-fade-in">
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-slate-800">Welcome Back!</h1>
-                    <p className="text-slate-500 mt-2">Sign in to BANDIFY</p>
+                    <p className="text-slate-500 mt-2">Sign in to BANDSENSE</p>
                 </div>
 
                 {error && (

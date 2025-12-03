@@ -37,7 +37,7 @@ function LandingPage() {
                 <div className="container mx-auto px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
                         <h1 className="text-2xl font-bold tracking-tight text-red-600 flex items-center gap-2">
-                            <span>BANDIFY</span>
+                            <span>BANDSENSE</span>
                         </h1>
                     </div>
                     
@@ -165,10 +165,10 @@ function LandingPage() {
             <footer className="bg-white border-t border-slate-200 py-10">
                 <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold text-red-600">BANDIFY</span>
+                        <span className="text-xl font-bold text-red-600">BANDSENSE</span>
                     </div>
                     <div className="text-sm text-slate-500">
-                        © {new Date().getFullYear()} BANDIFY. All rights reserved.
+                        © {new Date().getFullYear()} BANDSENSE. All rights reserved.
                     </div>
                     <div className="flex gap-6 text-slate-600 text-sm font-medium">
                         <a href="#" className="hover:text-red-600 transition-colors">Privacy</a>

@@ -104,7 +104,7 @@ function Registration() {
             <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg animate-fade-in">
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-slate-800">Create Your Account</h1>
-                    <p className="text-slate-500 mt-2">Get started with BANDIFY.</p>
+                    <p className="text-slate-500 mt-2">Get started with BANDSENSE.</p>
                 </div>
 
                 {error && (
