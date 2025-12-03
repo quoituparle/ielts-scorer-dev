@@ -184,6 +184,7 @@ function Playground() {
             setViewState('rank_list');
         } catch (err) {
             alert("Failed to fetch ranking data.");
+            console.log(err)
         } finally {
             setLoading(false);
         }
