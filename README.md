@@ -73,7 +73,3 @@ We believe in choosing the right tool for the job.
 Got an idea to make IELTS less painful? PRs are welcome! Please make sure to check out the backend repo if your changes involve API logic.
 
 ---
-
-<div align="center">
-  <sub>Built with ❤️ by [Your Name]</sub>
-</div>
