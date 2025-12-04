@@ -1,7 +1,10 @@
 import axios from "axios";
 
+const baseURL = import.meta.env.VITE_API_BASE_URL || "https://api.flyflypig.online";
+
 const apiClient = axios.create({
-    baseURL: '/api'
+    baseURL: baseURL, 
+    withCredentials: true, 
 });
 
 apiClient.interceptors.request.use(
